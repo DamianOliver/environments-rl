@@ -91,7 +91,7 @@ class PutNearEnv(MiniGridEnv):
     def step(self, action):
         preCarrying = self.carrying
 
-        obs, reward, done, info = super().step(action)
+        obs, reward, done, truncated, info = super().step(action)
 
         u, v = self.dir_vec
         ox, oy = (self.agent_pos[0] + u, self.agent_pos[1] + v)
@@ -109,7 +109,7 @@ class PutNearEnv(MiniGridEnv):
                     reward = self._reward()
             done = True
 
-        return obs, reward, done, info
+        return obs, reward, done, truncated, info
 
 class PutNear8x8N3(PutNearEnv):
     def __init__(self):

@@ -42,7 +42,7 @@ for env_name in env_list:
         # Pick a random action
         action = random.randint(0, env.action_space.n - 1)
 
-        obs, reward, done, info = env.step(action)
+        obs, reward, done, truncated, info = env.step(action)
 
         # Validate the agent position
         assert env.agent_pos[0] < env.width
@@ -87,7 +87,7 @@ for env_name in env_list:
     env = gym.make(env_name)
     env = FullyObsWrapper(env)
     env.reset()
-    obs, _, _, _ = env.step(0)
+    obs, _, _, _, _ = env.step(0)
     assert obs.shape == env.observation_space.shape
     env.close()
 

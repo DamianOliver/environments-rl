@@ -115,8 +115,8 @@ class LockedRoom(MiniGridEnv):
         ) % (lockedRoom.color, keyRoom.color, lockedRoom.color)
 
     def step(self, action):
-        obs, reward, done, info = MiniGridEnv.step(self, action)
-        return obs, reward, done, info
+        obs, reward, done, truncated,info = MiniGridEnv.step(self, action)
+        return obs, reward, done, truncated, info
 
 register(
     id='MiniGrid-LockedRoom-v0',

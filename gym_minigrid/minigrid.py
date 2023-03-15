@@ -592,7 +592,7 @@ class Grid:
         return grid
 
     def process_vis(grid, agent_pos):
-        mask = np.zeros(shape=(grid.width, grid.height), dtype=np.bool)
+        mask = np.zeros(shape=(grid.width, grid.height), dtype=np.bool_)
 
         mask[agent_pos[0], agent_pos[1]] = True
 
@@ -691,7 +691,9 @@ class MiniGridEnv(gym.Env):
             dtype='uint8'
         )
         self.observation_space = spaces.Dict({
-            'image': self.observation_space
+            'image': self.observation_space,
+            'direction': spaces.Discrete(4),
+            'mission': spaces.Text(max_length=256)
         })
 
         # Range of possible rewards
@@ -719,10 +721,13 @@ class MiniGridEnv(gym.Env):
         # Initialize the state
         self.reset()
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         # Current position and direction of the agent
         self.agent_pos = None
         self.agent_dir = None
+
+        if seed != None:
+            self.seed(seed)
 
         # Generate a new random grid at the start of each episode
         # To keep the same grid for each episode, call env.seed() with
@@ -745,7 +750,7 @@ class MiniGridEnv(gym.Env):
 
         # Return first observation
         obs = self.gen_obs()
-        return obs
+        return obs, {}
 
     def seed(self, seed=1337):
         # Seed the random number generator
@@ -832,7 +837,7 @@ class MiniGridEnv(gym.Env):
         Generate random integer in [low,high[
         """
 
-        return self.np_random.randint(low, high)
+        return self.np_random.integers(low, high)
 
     def _rand_float(self, low, high):
         """
@@ -846,7 +851,7 @@ class MiniGridEnv(gym.Env):
         Generate random boolean value
         """
 
-        return (self.np_random.randint(0, 2) == 0)
+        return (self.np_random.integers(0, 2) == 0)
 
     def _rand_elem(self, iterable):
         """
@@ -887,8 +892,8 @@ class MiniGridEnv(gym.Env):
         """
 
         return (
-            self.np_random.randint(xLow, xHigh),
-            self.np_random.randint(yLow, yHigh)
+            self.np_random.integers(xLow, xHigh),
+            self.np_random.integers(yLow, yHigh)
         )
 
     def place_obj(self,
@@ -1155,7 +1160,7 @@ class MiniGridEnv(gym.Env):
 
         obs = self.gen_obs()
 
-        return obs, reward, done, {}
+        return obs, reward, done, False, {}
 
     def gen_obs_grid(self):
         """
@@ -1176,7 +1181,7 @@ class MiniGridEnv(gym.Env):
         if not self.see_through_walls:
             vis_mask = grid.process_vis(agent_pos=(self.agent_view_size // 2 , self.agent_view_size - 1))
         else:
-            vis_mask = np.ones(shape=(grid.width, grid.height), dtype=np.bool)
+            vis_mask = np.ones(shape=(grid.width, grid.height), dtype=np.bool_)
 
         # Make it so the agent sees what it's carrying
         # We do this by placing the carried object at the agent's position
