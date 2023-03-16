@@ -8,8 +8,8 @@ import gym
 import time
 from optparse import OptionParser
 
-from configurations import config_grabber as cg
-config = cg.Configuration.grab()
+# from configurations import config_grabber as cg
+# config = cg.Configuration.grab()
 
 import gym_minigrid
 
@@ -24,8 +24,10 @@ def main():
     )
     (options, args) = parser.parse_args()
 
+    print(options)
+
     # Load the gym environment
-    env = gym.make(config.env_name)
+    env = gym.make(options.env_name)
 
     def resetEnv():
         # env.seed(4)
@@ -71,7 +73,7 @@ def main():
             print("unknown key %s" % keyName)
             return
 
-        obs, reward, done, info = env.step(action)
+        obs, reward, done, truncated, info = env.step(action)
 
         print('step=%s, reward=%.2f' % (env.step_count, reward))
 

@@ -665,7 +665,8 @@ class MiniGridEnv(gym.Env):
         max_steps=100,
         see_through_walls=False,
         seed=1337,
-        agent_view_size=7
+        agent_view_size=7,
+        actions=None
     ):
         # Can't set both grid_size and width/height
         if grid_size:
@@ -674,7 +675,7 @@ class MiniGridEnv(gym.Env):
             height = grid_size
 
         # Action enumeration for this environment
-        self.actions = MiniGridEnv.Actions
+        self.actions = MiniGridEnv.Actions if actions == None else actions
 
         # Actions are discrete integer values
         self.action_space = spaces.Discrete(len(self.actions))

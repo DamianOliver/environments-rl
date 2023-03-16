@@ -49,14 +49,14 @@ class KeyCorridor(RoomGrid):
         self.mission = "pick up the %s %s" % (obj.color, obj.type)
 
     def step(self, action):
-        obs, reward, done, info = super().step(action)
+        obs, reward, done, truncated, info = super().step(action)
 
         if action == self.actions.pickup:
             if self.carrying and self.carrying == self.obj:
                 reward = self._reward()
                 done = True
 
-        return obs, reward, done, info
+        return obs, reward, done, truncated, info
 
 class KeyCorridorS3R1(KeyCorridor):
     def __init__(self, seed=None):

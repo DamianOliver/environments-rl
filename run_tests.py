@@ -117,7 +117,7 @@ assert ('blue', 'key') not in env.grid
 env.reset()
 for i in range(0, 500):
     action = random.randint(0, env.action_space.n - 1)
-    obs, reward, done, info = env.step(action)
+    obs, reward, done, truncated, info = env.step(action)
     goal_visible = ('green', 'goal') in Grid.decode(obs['image'])
     agent_sees_goal = env.agent_sees(*goal_pos)
     assert agent_sees_goal == goal_visible

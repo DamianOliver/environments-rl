@@ -1,4 +1,5 @@
 import numpy as np
+import pygame
 # from PyQt5.QtCore import Qt
 # from PyQt5.QtGui import QImage, QPixmap, QPainter, QColor, QPolygon
 # from PyQt5.QtCore import QPoint, QSize, QRect
@@ -12,8 +13,8 @@ class Window:
 
     def __init__(self):
         super().__init__()
-
-        # self.setWindowTitle('MiniGrid Gym Environment')
+        
+        self.setWindowTitle('MiniGrid Gym Environment')
 
         # # Image label to display the rendering
         # self.imgLabel = QLabel()
@@ -44,13 +45,16 @@ class Window:
         # self.show()
         # self.setFocus()
 
-        # self.closed = False
+        self.closed = False
 
         # # Callback for keyboard events
-        # self.keyDownCb = None
+        self.keyDownCb = None
 
-    def closeEvent(self, event):
-        # self.closed = True
+    def setWindowTitle(self, title):
+        pygame.display.set_caption(title)
+
+    def closeEvent(self, event=None):
+        self.closed = True
         pass
 
     def setPixmap(self, pixmap):
@@ -62,42 +66,42 @@ class Window:
         pass
 
     def setKeyDownCb(self, callback):
-        # self.keyDownCb = callback
+        self.keyDownCb = callback
         pass
 
     def keyPressEvent(self, e):
-        # if self.keyDownCb == None:
-        #     return
+        if self.keyDownCb == None:
+            return
 
-        # keyName = None
-        # if e.key() == Qt.Key_Left:
-        #     keyName = 'LEFT'
-        # elif e.key() == Qt.Key_Right:
-        #     keyName = 'RIGHT'
-        # elif e.key() == Qt.Key_Up:
-        #     keyName = 'UP'
-        # elif e.key() == Qt.Key_Down:
-        #     keyName = 'DOWN'
-        # elif e.key() == Qt.Key_Space:
-        #     keyName = 'SPACE'
-        # elif e.key() == Qt.Key_Return:
-        #     keyName = 'RETURN'
-        # elif e.key() == Qt.Key_Alt:
-        #     keyName = 'ALT'
-        # elif e.key() == Qt.Key_Control:
-        #     keyName = 'CTRL'
-        # elif e.key() == Qt.Key_PageUp:
-        #     keyName = 'PAGE_UP'
-        # elif e.key() == Qt.Key_PageDown:
-        #     keyName = 'PAGE_DOWN'
-        # elif e.key() == Qt.Key_Backspace:
-        #     keyName = 'BACKSPACE'
-        # elif e.key() == Qt.Key_Escape:
-        #     keyName = 'ESCAPE'
+        keyName = None
+        if e.key == pygame.K_LEFT:
+            keyName = 'LEFT'
+        elif e.key == pygame.K_RIGHT:
+            keyName = 'RIGHT'
+        elif e.key == pygame.K_UP:
+            keyName = 'UP'
+        elif e.key == pygame.K_DOWN:
+            keyName = 'DOWN'
+        elif e.key == pygame.K_SPACE:
+            keyName = 'SPACE'
+        elif e.key == pygame.K_RETURN:
+            keyName = 'RETURN'
+        elif e.key == pygame.K_LALT or e.key == pygame.K_RALT:
+            keyName = 'ALT'
+        elif e.key == pygame.K_LCTRL or e.key == pygame.K_RCTRL:
+            keyName = 'CTRL'
+        elif e.key == pygame.K_PAGEUP:
+            keyName = 'PAGE_UP'
+        elif e.key == pygame.K_PAGEDOWN:
+            keyName = 'PAGE_DOWN'
+        elif e.key == pygame.K_BACKSPACE:
+            keyName = 'BACKSPACE'
+        elif e.key == pygame.K_ESCAPE:
+            keyName = 'ESCAPE'
 
-        # if keyName == None:
-        #     return
-        # self.keyDownCb(keyName)
+        if keyName == None:
+            return
+        self.keyDownCb(keyName)
         pass
 
 class Renderer:
@@ -109,15 +113,18 @@ class Renderer:
         # self.painter = QPainter()
 
         self.window = None
-        # if ownWindow:
+        if ownWindow:
+            self.screen = pygame.display.set_mode((width, height))
+            pygame.init()
+            self.window = Window()
         #     self.app = QApplication([])
-        #     self.window = Window()
         pass
 
     def close(self):
         """
         Deallocate resources used
         """
+        self.window.closeEvent()
         pass
 
     def beginFrame(self):
@@ -125,24 +132,35 @@ class Renderer:
         # self.painter.setRenderHint(QPainter.Antialiasing, False)
 
         # # Clear the background
+        self.screen.fill((0, 0, 0))
         # self.painter.setBrush(QColor(0, 0, 0))
         # self.painter.drawRect(0, 0, self.width - 1, self.height - 1)
         pass
 
     def endFrame(self):
+        pygame.display.flip()
         # self.painter.end()
 
-        # if self.window:
-        #     if self.window.closed:
-        #         self.window = None
-        #     else:
-        #         self.window.setPixmap(self.getPixmap())
-        #         self.app.processEvents()
+        if self.window:
+            if self.window.closed:
+                pygame.quit()
+                self.window = None
+            else:
+                # self.window.setPixmap(self.getPixmap())
+                self.processEvents()
         pass
 
     def getPixmap(self):
         # return QPixmap.fromImage(self.img)
         return None
+
+    def processEvents(self):
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                self.window.closeEvent(event)
+            if event.type == pygame.KEYDOWN:
+                self.window.keyPressEvent(event)
 
     def getArray(self):
         """

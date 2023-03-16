@@ -88,7 +88,7 @@ class MemoryEnv(MiniGridEnv):
     def step(self, action):
         if action == MiniGridEnv.Actions.pickup:
             action = MiniGridEnv.Actions.toggle
-        obs, reward, done, info = MiniGridEnv.step(self, action)
+        obs, reward, done, truncated, info = MiniGridEnv.step(self, action)
 
         if tuple(self.agent_pos) == self.success_pos:
             reward = self._reward()
@@ -97,7 +97,7 @@ class MemoryEnv(MiniGridEnv):
             reward = 0
             done = True
 
-        return obs, reward, done, info
+        return obs, reward, done, truncated, info
 
 class MemoryS17Random(MemoryEnv):
     def __init__(self, seed=None):

@@ -24,7 +24,6 @@ class Unlock(RoomGrid):
         door, _ = self.add_door(0, 0, 0, locked=True)
         # Add a key to unlock the door
         self.add_object(0, 0, 'key', door.color)
-        self.add_object(0, 0, 'water')
 
         self.place_agent(0, 0)
 
@@ -32,14 +31,14 @@ class Unlock(RoomGrid):
         self.mission = "open the door"
 
     def step(self, action):
-        obs, reward, done, info = super().step(action)
+        obs, reward, done, truncated, info = super().step(action)
 
         if action == self.actions.toggle:
             if self.door.is_open:
                 reward = self._reward()
                 done = True
 
-        return obs, reward, done, info
+        return obs, reward, done, truncated, info
 
 register(
     id='MiniGrid-Unlock-v0',

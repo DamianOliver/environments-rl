@@ -538,7 +538,7 @@ class ExMiniGridEnv(MiniGridEnv):
 
         if self.config.debug_mode: print("reward: " + str(reward) + "\tinfo: " + str(info))
 
-        return obs, reward, done, info
+        return obs, reward, done, False, info
 
 
     def goal_enabled(self):

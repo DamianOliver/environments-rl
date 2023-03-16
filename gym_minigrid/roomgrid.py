@@ -193,11 +193,11 @@ class RoomGrid(MiniGridEnv):
                 # Door positions, order is right, down, left, up
                 if i < self.num_cols - 1:
                     room.neighbors[0] = self.room_grid[j][i+1]
-                    room.door_pos[0] = (x_m, self._rand_int(y_l+1, y_m-1))
+                    room.door_pos[0] = (x_m, self._rand_int(y_l, y_m))
                     room.lightsw_pos[0] = (room.door_pos[0][0] - 1, room.door_pos[0][1] + 1)
                 if j < self.num_rows - 1:
                     room.neighbors[1] = self.room_grid[j+1][i]
-                    room.door_pos[1] = (self._rand_int(x_l+1, x_m-1), y_m)
+                    room.door_pos[1] = (self._rand_int(x_l, x_m), y_m)
                     room.lightsw_pos[1] = (room.door_pos[1][0] - 1, room.door_pos[1][1] - 1)
                 if i > 0:
                     room.neighbors[2] = self.room_grid[j][i-1]

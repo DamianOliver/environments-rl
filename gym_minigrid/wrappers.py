@@ -94,7 +94,7 @@ class StateBonus(gym.core.Wrapper):
         bonus = 1 / math.sqrt(new_count)
         reward += bonus
 
-        return obs, reward, done, info
+        return obs, reward, done, truncated, info
 
     def reset(self, **kwargs):
         return self.env.reset(**kwargs)
