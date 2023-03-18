@@ -1338,7 +1338,7 @@ class MiniGridEnv(gym.Env):
                         abs_j * tile_size,
                         tile_size,
                         tile_size,
-                        255, 255, 255, 75
+                        255, 255, 255, 128
                     )
 
         r.endFrame()

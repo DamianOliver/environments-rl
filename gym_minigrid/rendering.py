@@ -90,9 +90,9 @@ class Window:
             keyName = 'ALT'
         elif e.key == pygame.K_LCTRL or e.key == pygame.K_RCTRL:
             keyName = 'CTRL'
-        elif e.key == pygame.K_PAGEUP:
+        elif e.key == pygame.K_PAGEUP or e.key == pygame.K_u:
             keyName = 'PAGE_UP'
-        elif e.key == pygame.K_PAGEDOWN:
+        elif e.key == pygame.K_PAGEDOWN or e.key == pygame.K_d:
             keyName = 'PAGE_DOWN'
         elif e.key == pygame.K_BACKSPACE:
             keyName = 'BACKSPACE'
@@ -133,9 +133,14 @@ class Renderer:
 
         # # Clear the background
         self.screen.fill((0, 0, 0))
+        self.setLineColor(255, 255, 255)
+        self.setColor(255, 255, 255)
+        self.setLineWidth(1)
         # self.painter.setBrush(QColor(0, 0, 0))
         # self.painter.drawRect(0, 0, self.width - 1, self.height - 1)
-        pass
+        self.transforms = []
+        self.transform = np.identity(3)
+        self.transforms.append(self.transform)
 
     def endFrame(self):
         pygame.display.flip()
@@ -176,61 +181,97 @@ class Renderer:
         # return output
         return None
 
+    def apply_transform(self, t):
+        self.transforms[-1] = np.dot(self.transforms[-1], t)
+        self.transform = np.dot(self.transform, t)
+
+    def transform_point(self, x, y):
+        p =  np.dot(self.transform, np.array((x, y, 1)))
+        return (p[0], p[1])
+
     def push(self):
-        # self.painter.save()
-        pass
+        self.transforms.append(np.identity(3))
 
     def pop(self):
-        # self.painter.restore()
-        pass
-
+        del self.transforms[-1]
+        if len(self.transforms) == 0:
+            self.push()
+        self.transform = np.identity(3)
+        for t in self.transforms:
+            self.transform = np.dot(self.transform, t)
+    
     def rotate(self, degrees):
-        # self.painter.rotate(degrees)
-        pass
+        theta = np.radians(degrees)
+        c  , s = np.cos(theta), np.sin(theta)
+        t = np.array(((c, -s, 0), (s, c, 0), (0, 0, 1)))
+        self.apply_transform(t)
 
     def translate(self, x, y):
-        # self.painter.translate(x, y)
-        pass
+        self.apply_transform(np.array(((1, 0, x), (0, 1, y), (0, 0, 1))))
 
     def scale(self, x, y):
-        # self.painter.scale(x, y)
-        pass
+        self.apply_transform(np.array(((x, 0, 0), (0, y, 0), (0, 0, 1))))
 
     def setLineColor(self, r, g, b, a=255):
-        # self.painter.setPen(QColor(r, g, b, a))
-        pass
+        self.line_color = (r, g, b, a)
 
     def setColor(self, r, g, b, a=255):
-        # self.painter.setBrush(QColor(r, g, b, a))
-        pass
+        self.fill_color = (r, g, b, a)
 
     def setLineWidth(self, width):
-        # pen = self.painter.pen()
-        # pen.setWidthF(width)
-        # self.painter.setPen(pen)
-        pass
+        self.line_width = width
 
     def drawLine(self, x0, y0, x1, y1):
-        # self.painter.drawLine(x0, y0, x1, y1)
-        pass
+        p1 = self.transform_point(x0, y0)
+        p2 = self.transform_point(x1, y1)
+        pygame.draw.line(self.screen, self.line_color, p1, p2, self.line_width)
 
     def drawCircle(self, x, y, r):
-        # center = QPoint(x, y)
-        # self.painter.drawEllipse(center, r, r)
-        pass
+        steps = 8
+        step = np.radians(360) / steps
+        points = []
+        for i in range(steps):
+            theta = i * step
+            points.append((x + r * np.cos(theta),y + r * np.sin(theta)))
+
+        self.drawPolygon(points)
 
     def drawPolygon(self, points):
+        transformed_points = list(map(lambda p: self.transform_point(p[0], p[1]), points))
         """Takes a list of points (tuples) as input"""
-        # points = map(lambda p: QPoint(p[0], p[1]), points)
-        # self.painter.drawPolygon(QPolygon(points))
-        pass
+        if self.fill_color[3] == 255: 
+            # Draw only if visible
+            pygame.draw.polygon(self.screen, self.fill_color, transformed_points, 0)
+        elif self.fill_color[3] != 0: 
+            # Draw in separate surface if transparent
+            minx, miny, maxx, maxy = float('inf'), float('inf'), 0, 0
+            for p in transformed_points:
+                minx = min(minx, p[0])
+                miny = min(miny, p[1])
+                maxx = max(minx, p[0])
+                maxy = max(maxy, p[1])
+            surface_points = []
+            for p in transformed_points:
+                surface_points.append((p[0] - minx, p[1] - miny))
+
+            s = pygame.Surface((maxx-minx, maxy-miny)) 
+            s.set_alpha(self.fill_color[3]) 
+            pygame.draw.polygon(s, self.fill_color, surface_points, 0)
+            self.screen.blit(s, (minx, miny))
+        
+        if self.line_color[3] != 0: # Draw only if visible
+            pygame.draw.polygon(self.screen, self.line_color, transformed_points, self.line_width)
 
     def drawPolyline(self, points):
-        # """Takes a list of points (tuples) as input"""
-        # points = map(lambda p: QPoint(p[0], p[1]), points)
-        # self.painter.drawPolyline(QPolygon(points))
-        pass
+        transformed_points = list(map(lambda p: self.transform_point(p[0], p[1]), points))
+        """Takes a list of points (tuples) as input"""
+        pygame.draw.lines(self.screen, self.line_color, False, transformed_points, self.line_width)
 
     def fillRect(self, x, y, width, height, r, g, b, a=255):
-        # self.painter.fillRect(QRect(x, y, width, height), QColor(r, g, b, a))
-        pass
+        self.setColor(r, g, b, a)
+        self.setLineColor(0, 0, 0, 0)
+        points = [ (x, y), 
+                   (x, y + height), 
+                   (x + width, y + height), 
+                   (x + width, y)]
+        self.drawPolygon(points)

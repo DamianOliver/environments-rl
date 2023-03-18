@@ -69,22 +69,23 @@ def main():
         elif keyName == 'RETURN':
             action = env.actions.done
 
+        if action != 0:
+            obs, reward, done, truncated, info = env.step(action)
+            print('step=%s, reward=%.2f' % (env.step_count, reward))
+
+            if done:
+                print('done!')
+                resetEnv()
         else:
             print("unknown key %s" % keyName)
-            return
 
-        obs, reward, done, truncated, info = env.step(action)
-
-        print('step=%s, reward=%.2f' % (env.step_count, reward))
-
-        if done:
-            print('done!')
-            resetEnv()
+        env.render('human')
 
     renderer.window.setKeyDownCb(keyDownCb)
 
     while True:
-        env.render('human')
+        # env.render('human')
+        renderer.processEvents()
         time.sleep(0.01)
 
         # If the window was closed
